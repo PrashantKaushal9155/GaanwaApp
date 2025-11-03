@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.musicplayerapp.ui.screens.HomeScreen
 import com.example.musicplayerapp.ui.theme.MusicPlayerAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,9 +34,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MusicPlayerAppTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    PermissionScreen {
-                        permissionLauncher.launch(permissions)
-                    }
+                    HomeScreen()
                 }
             }
         }
