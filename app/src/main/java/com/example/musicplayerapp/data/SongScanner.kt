@@ -4,15 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-
-data class Song(
-    val id: Long,
-    val title: String,
-    val artist: String?,
-    val album: String?,
-    val duration: Long,
-    val uri: Uri
-)
+import com.example.musicplayerapp.data.model.Song
 
 object SongScanner {
 

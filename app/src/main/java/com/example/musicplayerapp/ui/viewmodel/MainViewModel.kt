@@ -3,8 +3,8 @@ package com.example.musicplayerapp.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.musicplayerapp.data.Song
 import com.example.musicplayerapp.data.SongScanner
+import com.example.musicplayerapp.data.model.Song
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
