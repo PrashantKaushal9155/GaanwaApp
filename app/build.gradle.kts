@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.ui)
     implementation(libs.material3)
     implementation(libs.ui.tooling.preview)
+    implementation(libs.androidx.documentfile)
     debugImplementation(libs.ui.tooling)
 
     // Lifecycle / ViewModel

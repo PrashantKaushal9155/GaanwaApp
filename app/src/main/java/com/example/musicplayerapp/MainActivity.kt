@@ -1,57 +1,42 @@
 package com.example.musicplayerapp
 
-import android.Manifest
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.example.musicplayerapp.core.PermissionHandler
 import com.example.musicplayerapp.ui.screens.HomeScreen
 import com.example.musicplayerapp.ui.theme.MusicPlayerAppTheme
+import com.example.musicplayerapp.ui.viewmodel.MainViewModel
 
 class MainActivity : ComponentActivity() {
 
-    private val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
-    } else {
-        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-    }
+    private val viewModel: MainViewModel by viewModels()
+    private val permissions = PermissionHandler.getRequiredPermissions()
+
+    private val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            val allGranted = result.values.all { it }
+            if (allGranted) viewModel.scanAllSongs {}
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val permissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-                // We’ll handle song loading later
-            }
+        permissionLauncher.launch(permissions)
 
         setContent {
             MusicPlayerAppTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    HomeScreen()
-                }
+                val songs by viewModel.songs.collectAsState()
+                HomeScreen(
+                    songs = songs,
+                    onScanAll = { viewModel.scanAllSongs {} },
+                    onPickFolder = { /* for later */ },
+                    onOpenPickerDirect = {}
+                )
             }
-        }
-    }
-}
-
-@Composable
-fun PermissionScreen(onRequestPermission: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(text = "Welcome to Gaanwa 🎵", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onRequestPermission) {
-            Text("Grant Storage Permission")
         }
     }
 }
