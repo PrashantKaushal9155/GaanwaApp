@@ -15,9 +15,7 @@ import com.example.musicplayerapp.data.model.Song
 @Composable
 fun HomeScreen(
     songs: List<Song>,
-    onScanAll: () -> Unit,
-    onPickFolder: () -> Unit,
-    onOpenPickerDirect: () -> Unit // optional: call when permission already granted
+    onSongClick: (Song) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -30,14 +28,23 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         if (songs.isEmpty()) {
-            Text("No songs scanned yet", modifier = Modifier.align(Alignment.CenterHorizontally))
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No songs found")
+            }
         } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 items(songs) { song ->
                     Column(modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { /* TODO: open player */ }
-                        .padding(vertical = 8.dp)) {
+                        .clickable { onSongClick(song) }
+                        .padding(vertical = 8.dp)
+                    ) {
                         Text(text = song.title, style = MaterialTheme.typography.bodyLarge)
                         Text(text = song.artist ?: "Unknown", style = MaterialTheme.typography.bodySmall)
                     }
