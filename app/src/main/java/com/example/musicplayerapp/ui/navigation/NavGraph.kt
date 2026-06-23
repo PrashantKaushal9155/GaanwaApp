@@ -16,6 +16,8 @@ fun AppNavGraph(
     currentSong: Song?,
     onSongClick: (Song) -> Unit,
     onPlayPause: () -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
     onBack: () -> Unit
 ) {
     NavHost(navController, startDestination = "home") {
@@ -39,6 +41,8 @@ fun AppNavGraph(
                 song = currentSong,
                 isPlaying = isPlaying,
                 onPlayPause = onPlayPause,
+                onPrevious = onPrevious,
+                onNext = onNext,
                 onBack = {
                     navController.popBackStack()
                     onBack()

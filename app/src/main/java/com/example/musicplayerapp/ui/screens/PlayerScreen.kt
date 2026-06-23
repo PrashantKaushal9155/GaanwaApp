@@ -1,6 +1,10 @@
 package com.example.musicplayerapp.ui.screens
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,7 +17,9 @@ fun PlayerScreen(
     song: Song?,
     isPlaying: Boolean,
     onPlayPause: () -> Unit,
-    onBack: () -> Unit
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    onBack: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -33,8 +39,27 @@ fun PlayerScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(onClick = onPlayPause) {
-            Text(if (isPlaying) "Pause" else "Play")
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onPrevious) {
+                Icon(
+                    imageVector = Icons.Default.SkipPrevious,
+                    contentDescription = "Previous"
+                )
+            }
+
+            Button(onClick = onPlayPause) {
+                Text(if (isPlaying) "Pause" else "Play")
+            }
+
+            IconButton(onClick = onNext) {
+                Icon(
+                    imageVector = Icons.Default.SkipNext,
+                    contentDescription = "Next"
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))

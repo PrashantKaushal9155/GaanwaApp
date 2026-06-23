@@ -46,11 +46,13 @@ class MainActivity : ComponentActivity() {
                         currentSong = currentSong,
                         isPlaying = isPlaying,
                         onSongClick = { song ->
-                            playerViewModel.play(song)
+                            playerViewModel.play(song, songs)
                         },
                         onPlayPause = {
                             if (isPlaying) playerViewModel.pause() else playerViewModel.resume()
                         },
+                        onPrevious = { playerViewModel.playPrevious()},
+                        onNext = { playerViewModel.playNext()},
                         onBack = { /* Nothing extra yet. */}
                     )
                 }
