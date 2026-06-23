@@ -47,7 +47,6 @@ class MainActivity : ComponentActivity() {
                         isPlaying = isPlaying,
                         onSongClick = { song ->
                             playerViewModel.play(song)
-                            navController.navigate("player")
                         },
                         onPlayPause = {
                             if (isPlaying) playerViewModel.pause() else playerViewModel.resume()

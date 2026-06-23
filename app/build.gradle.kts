@@ -58,7 +58,7 @@ dependencies {
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.navigation.runtime.ktx)
     debugImplementation(libs.ui.tooling)
-    implementation("androidx.navigation:navigation-compose:2.8.4")
+    implementation("androidx.navigation:navigation-compose:2.9.8")
 
     // Lifecycle / ViewModel
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -70,6 +70,9 @@ dependencies {
     // Media3 (ExoPlayer via Media3)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session) // for sessions/notifications if later needed
+
+    // Material Icons
+    implementation("androidx.compose.material:material-icons-extended")
 
     // Room (DB for playlists/favorites)
     implementation(libs.androidx.room.runtime.v272)

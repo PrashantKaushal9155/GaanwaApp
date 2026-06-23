@@ -22,8 +22,14 @@ fun AppNavGraph(
         composable("home") {
             HomeScreen(
                 songs = songs,
+                currentSong = currentSong,
+                isPlaying = isPlaying,
                 onSongClick = { song ->
                     onSongClick(song)
+                    navController.navigate("player")
+                },
+                onPlayPause = onPlayPause,
+                onMiniPlayerClick = {
                     navController.navigate("player")
                 }
             )
