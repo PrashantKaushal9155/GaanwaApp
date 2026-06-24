@@ -32,6 +32,9 @@ class MainActivity : ComponentActivity() {
         permissionLauncher.launch(permissions)
 
         setContent {
+            val currentPosition by playerViewModel.currentPosition.collectAsState()
+            val duration by playerViewModel.duration.collectAsState()
+
             MusicPlayerAppTheme {
                 Surface {
                     val navController = rememberNavController()
@@ -45,6 +48,9 @@ class MainActivity : ComponentActivity() {
                         songs = songs,
                         currentSong = currentSong,
                         isPlaying = isPlaying,
+                        currentPosition = currentPosition,
+                        duration = duration,
+                        onSeek = { playerViewModel.seekTo(it) },
                         onSongClick = { song ->
                             playerViewModel.play(song, songs)
                         },

@@ -6,6 +6,9 @@ import com.example.musicplayerapp.data.model.Song
 import com.example.musicplayerapp.domain.player.MusicPlayerManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -18,6 +21,21 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     val isPlaying = _isPlaying.asStateFlow()
     private var playlist: List<Song> = emptyList()
     private var currentIndex: Int = -1
+    private val _currentPosition = MutableStateFlow(0L)
+    val currentPosition = _currentPosition.asStateFlow()
+
+    private val _duration = MutableStateFlow(0L)
+    val duration = _duration.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            while (true) {
+                _currentPosition.value = playerManager.getCurrentPosition()
+                _duration.value = playerManager.getDuration()
+                delay(1000)
+            }
+        }
+    }
 
     fun play(song: Song, songs: List<Song>) {
         playlist = songs
@@ -62,6 +80,19 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             playerManager.playSong(previousSong)
             _isPlaying.value = true
         }
+    }
+
+    fun seekTo(position: Long) {
+        playerManager.seekTo(position)
+        _currentPosition.value = position
+    }
+
+    fun getCurrentPosition(): Long {
+        return playerManager.getCurrentPosition()
+    }
+
+    fun getDuration(): Long {
+        return playerManager.getDuration()
     }
 
     override fun onCleared() {

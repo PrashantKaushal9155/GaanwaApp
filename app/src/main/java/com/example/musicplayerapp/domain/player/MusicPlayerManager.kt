@@ -43,4 +43,17 @@ class MusicPlayerManager(private val context: Context) {
     }
 
     fun isPlaying(): Boolean = exoPlayer?.isPlaying ?: false
+
+    fun getCurrentPosition(): Long {
+        return exoPlayer?.currentPosition ?: 0L
+    }
+
+    fun getDuration(): Long {
+        val duration = exoPlayer?.duration ?: 0L
+        return if (duration < 0) 0L else duration
+    }
+
+    fun seekTo(position: Long) {
+        exoPlayer?.seekTo(position)
+    }
 }

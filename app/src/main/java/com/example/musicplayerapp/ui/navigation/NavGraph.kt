@@ -7,12 +7,16 @@ import androidx.navigation.compose.composable
 import com.example.musicplayerapp.data.model.Song
 import com.example.musicplayerapp.ui.screens.HomeScreen
 import com.example.musicplayerapp.ui.screens.PlayerScreen
+import kotlin.time.Duration
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
     songs: List<Song>,
     isPlaying: Boolean,
+    currentPosition: Long,
+    duration: Long,
+    onSeek: (Long) -> Unit,
     currentSong: Song?,
     onSongClick: (Song) -> Unit,
     onPlayPause: () -> Unit,
@@ -40,6 +44,9 @@ fun AppNavGraph(
             PlayerScreen(
                 song = currentSong,
                 isPlaying = isPlaying,
+                currentPosition = currentPosition,
+                duration = duration,
+                onSeek = onSeek,
                 onPlayPause = onPlayPause,
                 onPrevious = onPrevious,
                 onNext = onNext,
