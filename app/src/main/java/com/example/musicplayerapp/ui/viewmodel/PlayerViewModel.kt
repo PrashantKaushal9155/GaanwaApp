@@ -28,6 +28,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     val duration = _duration.asStateFlow()
     private val _isShuffleEnabled = MutableStateFlow(false)
     val isShuffleEnabled = _isShuffleEnabled.asStateFlow()
+    private val _isRepeatEnabled = MutableStateFlow(false)
+    val isRepeatEnabled = _isRepeatEnabled.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -42,7 +44,13 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     init {
         playerManager.initializePlayer()
         playerManager.setOnSongCompletedListener {
-            playNext()
+            if (_isRepeatEnabled.value) {
+                _currentSong.value?.let {
+                    playerManager.playSong(it)
+                }
+            } else {
+                playNext()
+            }
         }
 
         viewModelScope.launch {
@@ -132,6 +140,10 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     fun toggleShuffle() {
         _isShuffleEnabled.value = !_isShuffleEnabled.value
+    }
+
+    fun toggleRepeat() {
+        _isRepeatEnabled.value = !_isRepeatEnabled.value
     }
 
     override fun onCleared() {

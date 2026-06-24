@@ -23,6 +23,8 @@ fun AppNavGraph(
     onPrevious: () -> Unit,
     isShuffleEnabled: Boolean,
     onShuffleClick: () -> Unit,
+    isRepeatEnabled: Boolean,
+    onRepeatClick: () -> Unit,
     onNext: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -53,6 +55,8 @@ fun AppNavGraph(
                 onPrevious = onPrevious,
                 isShuffleEnabled = isShuffleEnabled,
                 onShuffleClick = onShuffleClick,
+                isRepeatEnabled = isRepeatEnabled,
+                onRepeatClick = onRepeatClick,
                 onNext = onNext,
                 onBack = {
                     navController.popBackStack()

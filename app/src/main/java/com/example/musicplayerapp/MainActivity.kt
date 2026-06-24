@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
                     val songs by viewModel.songs.collectAsState()
                     val currentSong by playerViewModel.currentSong.collectAsState()
                     val isPlaying by playerViewModel.isPlaying.collectAsState()
+                    val isRepeatEnabled by playerViewModel.isRepeatEnabled.collectAsState()
 
                     AppNavGraph(
                         navController = navController,
@@ -61,6 +62,8 @@ class MainActivity : ComponentActivity() {
                         onPrevious = { playerViewModel.playPrevious()},
                         isShuffleEnabled = isShuffleEnabled,
                         onShuffleClick = { playerViewModel.toggleShuffle() },
+                        isRepeatEnabled = isRepeatEnabled,
+                        onRepeatClick = { playerViewModel.toggleRepeat() },
                         onNext = { playerViewModel.playNext()},
                         onBack = { /* Nothing extra yet. */}
                     )

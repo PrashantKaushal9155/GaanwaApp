@@ -3,6 +3,7 @@ package com.example.musicplayerapp.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
@@ -33,6 +34,8 @@ fun PlayerScreen(
     onPrevious: () -> Unit,
     isShuffleEnabled: Boolean,
     onShuffleClick: () -> Unit,
+    isRepeatEnabled: Boolean,
+    onRepeatClick: () -> Unit,
     onNext: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -79,7 +82,7 @@ fun PlayerScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(48.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onShuffleClick) {
@@ -90,6 +93,21 @@ fun PlayerScreen(
                 )
             }
 
+            IconButton(onClick = onRepeatClick) {
+                Icon(
+                    imageVector = Icons.Default.Repeat,
+                    contentDescription = "Repeat",
+                    tint = if (isRepeatEnabled) Color.Green else LocalContentColor.current
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(32.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             IconButton(onClick = onPrevious) {
                 Icon(
                     imageVector = Icons.Default.SkipPrevious,
