@@ -21,6 +21,8 @@ fun AppNavGraph(
     onSongClick: (Song) -> Unit,
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
+    isShuffleEnabled: Boolean,
+    onShuffleClick: () -> Unit,
     onNext: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -49,6 +51,8 @@ fun AppNavGraph(
                 onSeek = onSeek,
                 onPlayPause = onPlayPause,
                 onPrevious = onPrevious,
+                isShuffleEnabled = isShuffleEnabled,
+                onShuffleClick = onShuffleClick,
                 onNext = onNext,
                 onBack = {
                     navController.popBackStack()

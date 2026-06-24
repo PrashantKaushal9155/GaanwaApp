@@ -34,6 +34,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val currentPosition by playerViewModel.currentPosition.collectAsState()
             val duration by playerViewModel.duration.collectAsState()
+            val isShuffleEnabled by playerViewModel.isShuffleEnabled.collectAsState()
 
             MusicPlayerAppTheme {
                 Surface {
@@ -58,6 +59,8 @@ class MainActivity : ComponentActivity() {
                             if (isPlaying) playerViewModel.pause() else playerViewModel.resume()
                         },
                         onPrevious = { playerViewModel.playPrevious()},
+                        isShuffleEnabled = isShuffleEnabled,
+                        onShuffleClick = { playerViewModel.toggleShuffle() },
                         onNext = { playerViewModel.playNext()},
                         onBack = { /* Nothing extra yet. */}
                     )

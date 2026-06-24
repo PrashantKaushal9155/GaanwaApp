@@ -1,15 +1,16 @@
 package com.example.musicplayerapp.ui.screens
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.musicplayerapp.data.model.Song
 import java.util.Locale
@@ -30,6 +31,8 @@ fun PlayerScreen(
     onSeek: (Long) -> Unit,
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
+    isShuffleEnabled: Boolean,
+    onShuffleClick: () -> Unit,
     onNext: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -79,6 +82,14 @@ fun PlayerScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(onClick = onShuffleClick) {
+                Icon(
+                    imageVector = Icons.Default.Shuffle,
+                    contentDescription = "Shuffle",
+                    tint = if (isShuffleEnabled) Color.Green else LocalContentColor.current
+                )
+            }
+
             IconButton(onClick = onPrevious) {
                 Icon(
                     imageVector = Icons.Default.SkipPrevious,

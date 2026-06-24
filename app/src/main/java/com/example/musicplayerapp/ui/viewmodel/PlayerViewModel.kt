@@ -26,6 +26,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _duration = MutableStateFlow(0L)
     val duration = _duration.asStateFlow()
+    private val _isShuffleEnabled = MutableStateFlow(false)
+    val isShuffleEnabled = _isShuffleEnabled.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -74,6 +76,24 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     fun playNext() {
         if (playlist.isEmpty()) return
 
+        if (_isShuffleEnabled.value) {
+            if (playlist.size == 1) return
+
+            var randomIndex: Int
+
+            do {
+                randomIndex = (playlist.indices).random()
+            } while (randomIndex == currentIndex)
+
+            currentIndex = randomIndex
+
+            val song = playlist[currentIndex]
+
+            _currentSong.value = song
+            playerManager.playSong(song)
+            _isPlaying.value = true
+            return
+        }
         if (currentIndex < playlist.lastIndex) {
             currentIndex++
             val nextSong = playlist[currentIndex]
@@ -108,6 +128,10 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     fun getDuration(): Long {
         return playerManager.getDuration()
+    }
+
+    fun toggleShuffle() {
+        _isShuffleEnabled.value = !_isShuffleEnabled.value
     }
 
     override fun onCleared() {
