@@ -37,6 +37,21 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    init {
+        playerManager.initializePlayer()
+        playerManager.setOnSongCompletedListener {
+            playNext()
+        }
+
+        viewModelScope.launch {
+            while (true) {
+                _currentPosition.value = playerManager.getCurrentPosition()
+                _duration.value = playerManager.getDuration()
+                delay(1000)
+            }
+        }
+    }
+
     fun play(song: Song, songs: List<Song>) {
         playlist = songs
         currentIndex = songs.indexOfFirst { it.id == song.id }

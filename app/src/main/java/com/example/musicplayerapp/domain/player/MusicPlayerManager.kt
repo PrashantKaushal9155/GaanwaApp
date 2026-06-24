@@ -2,6 +2,7 @@ package com.example.musicplayerapp.domain.player
 
 import android.content.Context
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.musicplayerapp.data.model.Song
 
@@ -55,5 +56,15 @@ class MusicPlayerManager(private val context: Context) {
 
     fun seekTo(position: Long) {
         exoPlayer?.seekTo(position)
+    }
+
+    fun setOnSongCompletedListener(onCompleted: () -> Unit) {
+        exoPlayer?.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_ENDED) {
+                    onCompleted()
+                }
+            }
+        })
     }
 }
