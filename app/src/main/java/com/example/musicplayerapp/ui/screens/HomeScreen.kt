@@ -4,14 +4,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.musicplayerapp.data.model.Song
 import com.example.musicplayerapp.ui.components.MiniPlayer
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -22,6 +28,9 @@ fun HomeScreen(
     onPlayPause: () -> Unit,
     onMiniPlayerClick: () -> Unit
 ) {
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -43,24 +52,70 @@ fun HomeScreen(
                     Text("No songs found")
                 }
             } else {
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                val availableLetters: Set<Char> = remember(songs) {
+                    songs.mapNotNull { song ->
+                        song.title.firstOrNull()?.uppercaseChar()
+                    }.toSet()
+                }
+                Row(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    items(songs) { song ->
-                        Column(
-                            modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSongClick(song) }
-                            .padding(vertical = 8.dp)
-                        ) {
-                            Text(text = song.title, style = MaterialTheme.typography.bodyLarge)
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(songs) { song ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onSongClick(song) }
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = song.title,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+
+                                Text(
+                                    text = song.artist ?: "Unknown",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+
+                            HorizontalDivider()
+                        }
+                    }
+
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        ('A'..'Z').forEach { letter ->
+
                             Text(
-                                text = song.artist ?: "Unknown",
-                                style = MaterialTheme.typography.bodySmall
+                                text = letter.toString(),
+                                color =
+                                    if (letter in availableLetters)
+                                        LocalContentColor.current
+                                    else
+                                        MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.clickable {
+
+                                    val index = songs.indexOfFirst {
+                                        it.title.startsWith(
+                                            letter.toString(),
+                                            ignoreCase = true
+                                        )
+                                    }
+
+                                    if (index >= 0) {
+                                        scope.launch {
+                                            listState.animateScrollToItem(index)
+                                        }
+                                    }
+                                }
                             )
                         }
-                        HorizontalDivider()
                     }
                 }
             }
