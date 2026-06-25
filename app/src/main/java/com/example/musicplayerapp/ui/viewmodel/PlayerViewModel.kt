@@ -32,16 +32,6 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     val isRepeatEnabled = _isRepeatEnabled.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            while (true) {
-                _currentPosition.value = playerManager.getCurrentPosition()
-                _duration.value = playerManager.getDuration()
-                delay(1000)
-            }
-        }
-    }
-
-    init {
         playerManager.initializePlayer()
         playerManager.setOnSongCompletedListener {
             if (_isRepeatEnabled.value) {

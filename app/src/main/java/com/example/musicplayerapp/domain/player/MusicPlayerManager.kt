@@ -22,6 +22,7 @@ class MusicPlayerManager(private val context: Context) {
         exoPlayer?.apply {
             setMediaItem(mediaItem)
             prepare()
+            setPlaybackSpeed(1f)
             play()
         }
     }

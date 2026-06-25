@@ -57,6 +57,19 @@ fun HomeScreen(
                         song.title.firstOrNull()?.uppercaseChar()
                     }.toSet()
                 }
+                val letterIndexMap = remember(songs) {
+                    buildMap {
+                        songs.forEachIndexed { index, song ->
+                            val firstLetter = song.title
+                                .firstOrNull()
+                                ?.uppercaseChar()
+
+                            if (firstLetter != null && firstLetter !in this) {
+                                put(firstLetter, index)
+                            }
+                        }
+                    }
+                }
                 Row(
                     modifier = Modifier.weight(1f)
                 ) {
@@ -98,15 +111,10 @@ fun HomeScreen(
                                     if (letter in availableLetters)
                                         LocalContentColor.current
                                     else
-                                        MaterialTheme.colorScheme.outline,
+                                        LocalContentColor.current.copy(alpha = 0.2f),
                                 modifier = Modifier.clickable {
 
-                                    val index = songs.indexOfFirst {
-                                        it.title.startsWith(
-                                            letter.toString(),
-                                            ignoreCase = true
-                                        )
-                                    }
+                                    val index = letterIndexMap[letter] ?: -1
 
                                     if (index >= 0) {
                                         scope.launch {
