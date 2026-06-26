@@ -18,7 +18,17 @@ import androidx.compose.ui.unit.dp
 import com.example.musicplayerapp.data.model.Song
 import com.example.musicplayerapp.ui.components.MiniPlayer
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.mutableStateOf
+import com.example.musicplayerapp.ui.components.SearchBar
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     songs: List<Song>,
@@ -30,111 +40,185 @@ fun HomeScreen(
 ) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    var isSearching by rememberSaveable {
+        mutableStateOf(false)
+    }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    var searchQuery by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    val filteredSongs = remember(songs, searchQuery) {
+
+        if (searchQuery.isBlank()) {
+            songs
+        } else {
+            songs.filter {
+
+                it.title.contains(searchQuery, true) ||
+
+                        (it.artist?.contains(searchQuery, true) == true)
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            if (isSearching) {
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    onClose = {
+                        isSearching = false
+                        searchQuery = ""
+                    }
+                )
+            } else {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "🎵 Gaanwa Music",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    },
+                    actions = {
+                        IconButton(onClick = { isSearching = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                )
+                HorizontalDivider(thickness = 1.dp)
+            }
+        }
+    ) { innerPadding ->
+
         Column(
             modifier = Modifier
-                .weight(1f)
-                .padding(16.dp)
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            Text("🎵 Gaanwa Music Player", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(text = "Songs", style = MaterialTheme.typography.headlineSmall)
-            Spacer(modifier = Modifier.height(10.dp))
 
-            if (songs.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("No songs found")
-                }
-            } else {
-                val availableLetters: Set<Char> = remember(songs) {
-                    songs.mapNotNull { song ->
-                        song.title.firstOrNull()?.uppercaseChar()
-                    }.toSet()
-                }
-                val letterIndexMap = remember(songs) {
-                    buildMap {
-                        songs.forEachIndexed { index, song ->
-                            val firstLetter = song.title
-                                .firstOrNull()
-                                ?.uppercaseChar()
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp)
+            ) {
 
-                            if (firstLetter != null && firstLetter !in this) {
-                                put(firstLetter, index)
-                            }
-                        }
-                    }
-                }
-                Row(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (filteredSongs.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        items(songs) { song ->
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onSongClick(song) }
-                                    .padding(vertical = 8.dp)
-                            ) {
-                                Text(
-                                    text = song.title,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
+                        Text(
+                            if (searchQuery.isBlank())
+                                "No songs found"
+                            else
+                                "No matching songs found"
+                        )
+                    }
+                } else {
 
-                                Text(
-                                    text = song.artist ?: "Unknown",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-
-                            HorizontalDivider()
-                        }
+                    val availableLetters = remember(songs) {
+                        songs.mapNotNull {
+                            it.title.firstOrNull()?.uppercaseChar()
+                        }.toSet()
                     }
 
-                    Column(
-                        modifier = Modifier.verticalScroll(rememberScrollState())
-                    ) {
-                        ('A'..'Z').forEach { letter ->
-
-                            Text(
-                                text = letter.toString(),
-                                color =
-                                    if (letter in availableLetters)
-                                        LocalContentColor.current
-                                    else
-                                        LocalContentColor.current.copy(alpha = 0.2f),
-                                modifier = Modifier.clickable {
-
-                                    val index = letterIndexMap[letter] ?: -1
-
-                                    if (index >= 0) {
-                                        scope.launch {
-                                            listState.animateScrollToItem(index)
-                                        }
+                    val letterIndexMap = remember(filteredSongs) {
+                        buildMap {
+                            filteredSongs.forEachIndexed { index, song ->
+                                song.title.firstOrNull()?.uppercaseChar()?.let { letter ->
+                                    if (letter !in this) {
+                                        put(letter, index)
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.weight(1f)
+                    ) {
+
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            items(filteredSongs) { song ->
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { onSongClick(song) }
+                                        .padding(vertical = 8.dp)
+                                ) {
+
+                                    Text(
+                                        text = song.title,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+
+                                    Text(
+                                        text = song.artist ?: "Unknown",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+
+                                HorizontalDivider()
+                            }
+                        }
+
+                        Column(
+                            modifier = Modifier.verticalScroll(
+                                rememberScrollState()
                             )
+                        ) {
+
+                            ('A'..'Z').forEach { letter ->
+
+                                Text(
+                                    text = letter.toString(),
+                                    color =
+                                        if (letter in availableLetters)
+                                            LocalContentColor.current
+                                        else
+                                            LocalContentColor.current.copy(alpha = 0.2f),
+                                    modifier = Modifier.clickable {
+
+                                        val index = letterIndexMap[letter] ?: -1
+
+                                        if (index >= 0) {
+                                            scope.launch {
+                                                listState.animateScrollToItem(index)
+                                            }
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
-        currentSong?.let { song ->
-            MiniPlayer(
-                song = song,
-                isPlaying = isPlaying,
-                onPlayPause = onPlayPause,
-                onClick = onMiniPlayerClick,
-            )
+
+            currentSong?.let { song ->
+                MiniPlayer(
+                    song = song,
+                    isPlaying = isPlaying,
+                    onPlayPause = onPlayPause,
+                    onClick = onMiniPlayerClick
+                )
+            }
         }
     }
 }
