@@ -3,16 +3,23 @@ package com.example.musicplayerapp.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.musicplayerapp.data.model.Song
-import com.example.musicplayerapp.domain.player.MusicPlayerManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import com.example.musicplayerapp.domain.player.MediaControllerManager
+import com.example.musicplayerapp.domain.player.toMediaItems
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val playerManager = MusicPlayerManager(application)
+    private val controllerManager =
+        MediaControllerManager(application)
+
+    private var controller: MediaController? = null
 
     private val _currentSong = MutableStateFlow<Song?>(null)
     val currentSong = _currentSong.asStateFlow()
@@ -20,7 +27,6 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying = _isPlaying.asStateFlow()
     private var playlist: List<Song> = emptyList()
-    private var currentIndex: Int = -1
     private val _currentPosition = MutableStateFlow(0L)
     val currentPosition = _currentPosition.asStateFlow()
 
@@ -31,113 +37,107 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     private val _isRepeatEnabled = MutableStateFlow(false)
     val isRepeatEnabled = _isRepeatEnabled.asStateFlow()
 
-    init {
-        playerManager.initializePlayer()
-        playerManager.setOnSongCompletedListener {
-            if (_isRepeatEnabled.value) {
-                _currentSong.value?.let {
-                    playerManager.playSong(it)
-                }
-            } else {
-                playNext()
-            }
+    private val playerListener = object : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            _isPlaying.value = isPlaying
         }
 
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            _currentSong.value = playlist.firstOrNull() {
+                it.id.toString() == mediaItem?.mediaId
+            }
+        }
+    }
+    init {
+
         viewModelScope.launch {
+
+            controller = controllerManager.getController()
+
+            controller?.addListener(playerListener)
             while (true) {
-                _currentPosition.value = playerManager.getCurrentPosition()
-                _duration.value = playerManager.getDuration()
-                delay(1000)
+                _currentPosition.value = controller?.currentPosition ?: 0L
+                _duration.value = maxOf(0L, controller?.duration ?: 0L)
+                delay(500)
             }
         }
     }
 
     fun play(song: Song, songs: List<Song>) {
         playlist = songs
-        currentIndex = songs.indexOfFirst { it.id == song.id }
 
         _currentSong.value = song
-        playerManager.playSong(song)
-        _isPlaying.value = true
+        val mediaItems = songs.toMediaItems()
+
+        controller?.apply {
+            setMediaItems(
+                mediaItems,
+                songs.indexOf(song),
+                0L
+            )
+            prepare()
+            play()
+        }
     }
 
     fun pause() {
-        playerManager.pause()
+        controller?.pause()
         _isPlaying.value = false
     }
 
     fun resume() {
-        playerManager.resume()
+        controller?.play()
         _isPlaying.value = true
     }
 
     fun playNext() {
-        if (playlist.isEmpty()) return
-
-        if (_isShuffleEnabled.value) {
-            if (playlist.size == 1) return
-
-            var randomIndex: Int
-
-            do {
-                randomIndex = (playlist.indices).random()
-            } while (randomIndex == currentIndex)
-
-            currentIndex = randomIndex
-
-            val song = playlist[currentIndex]
-
-            _currentSong.value = song
-            playerManager.playSong(song)
-            _isPlaying.value = true
-            return
-        }
-        if (currentIndex < playlist.lastIndex) {
-            currentIndex++
-            val nextSong = playlist[currentIndex]
-
-            _currentSong.value = nextSong
-            playerManager.playSong(nextSong)
-            _isPlaying.value = true
-        }
+        controller?.seekToNextMediaItem()
+        controller?.play()
     }
 
     fun playPrevious() {
-        if (playlist.isEmpty()) return
+            if ((controller?.currentPosition ?: 0) > 3000)
+                controller?.seekTo(0)
+            else
+                controller?.seekToPreviousMediaItem()
 
-        if (currentIndex > 0) {
-            currentIndex--
-            val previousSong = playlist[currentIndex]
-
-            _currentSong.value = previousSong
-            playerManager.playSong(previousSong)
-            _isPlaying.value = true
-        }
+            controller?.play()
     }
 
     fun seekTo(position: Long) {
-        playerManager.seekTo(position)
-        _currentPosition.value = position
+        controller?.seekTo(position)
     }
 
-    fun getCurrentPosition(): Long {
-        return playerManager.getCurrentPosition()
-    }
-
-    fun getDuration(): Long {
-        return playerManager.getDuration()
-    }
+//    fun getCurrentPosition(): Long {
+//        return playerManager.getCurrentPosition()
+//    }
+//
+//    fun getDuration(): Long {
+//        return playerManager.getDuration()
+//    }
 
     fun toggleShuffle() {
-        _isShuffleEnabled.value = !_isShuffleEnabled.value
+        controller?.let {
+            it.shuffleModeEnabled = !it.shuffleModeEnabled
+            _isShuffleEnabled.value = it.shuffleModeEnabled
+        }
     }
 
     fun toggleRepeat() {
-        _isRepeatEnabled.value = !_isRepeatEnabled.value
+        controller?.let {
+            it.repeatMode =
+                if (controller?.repeatMode == Player.REPEAT_MODE_ONE)
+                    Player.REPEAT_MODE_OFF
+                else
+                    Player.REPEAT_MODE_ONE
+
+            _isRepeatEnabled.value = it.repeatMode == Player.REPEAT_MODE_ONE
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
-        playerManager.release()
+        controller?.removeListener(playerListener)
+        controllerManager.release()
     }
 }

@@ -1,5 +1,6 @@
 package com.example.musicplayerapp
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.rememberNavController
 import com.example.musicplayerapp.core.PermissionHandler
+import com.example.musicplayerapp.domain.player.MusicPlaybackService
 import com.example.musicplayerapp.ui.navigation.AppNavGraph
 import com.example.musicplayerapp.ui.theme.MusicPlayerAppTheme
 import com.example.musicplayerapp.ui.viewmodel.MainViewModel
@@ -29,6 +31,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val serviceIntent = Intent(this, MusicPlaybackService::class.java)
+        startService(serviceIntent)
         permissionLauncher.launch(permissions)
 
         setContent {

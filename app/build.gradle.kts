@@ -66,6 +66,7 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.10.2")
 
     // Media3 (ExoPlayer via Media3)
     implementation(libs.androidx.media3.exoplayer)
