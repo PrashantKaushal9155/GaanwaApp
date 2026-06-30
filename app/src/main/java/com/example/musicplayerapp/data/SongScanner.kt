@@ -8,7 +8,10 @@ import com.example.musicplayerapp.data.model.Song
 
 object SongScanner {
 
-    fun scanAllSongs(context: Context): List<Song> {
+    fun scanAllSongs(
+        context: Context,
+        onSongScanned: (Int) -> Unit
+    ): List<Song> {
         val songs = mutableListOf<Song>()
         val collection =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
@@ -46,6 +49,8 @@ object SongScanner {
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id.toString()
                 )
                 songs.add(Song(id, title, artist, album, duration, uri))
+
+                onSongScanned(songs.size)
             }
         }
         return songs

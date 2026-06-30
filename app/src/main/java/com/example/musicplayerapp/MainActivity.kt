@@ -26,7 +26,11 @@ class MainActivity : ComponentActivity() {
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
             val allGranted = result.values.all { it }
-            if (allGranted) viewModel.scanAllSongs {}
+            if (allGranted) {
+                viewModel.scanAllSongs {  }
+            } else {
+                viewModel.stopScanning()
+            }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +43,8 @@ class MainActivity : ComponentActivity() {
             val currentPosition by playerViewModel.currentPosition.collectAsState()
             val duration by playerViewModel.duration.collectAsState()
             val isShuffleEnabled by playerViewModel.isShuffleEnabled.collectAsState()
+            val isScanning by viewModel.isScanning.collectAsState()
+            val scanCount by viewModel.scanCount.collectAsState()
 
             MusicPlayerAppTheme {
                 Surface {
@@ -54,6 +60,8 @@ class MainActivity : ComponentActivity() {
                         songs = songs,
                         currentSong = currentSong,
                         isPlaying = isPlaying,
+                        isScanning = isScanning,
+                        scanCount = scanCount,
                         currentPosition = currentPosition,
                         duration = duration,
                         onSeek = { playerViewModel.seekTo(it) },

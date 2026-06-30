@@ -9,19 +9,34 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _songs = MutableStateFlow<List<Song>>(emptyList())
     var songs = _songs.asStateFlow()
+    private val _isScanning = MutableStateFlow(true)
+    val isScanning = _isScanning.asStateFlow()
 
-    fun scanAllSongs(onScanned: (List<Song>) -> Unit) {
-        viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                SongScanner.scanAllSongs(getApplication())
+    private val _scanCount = MutableStateFlow(0)
+    val scanCount = _scanCount.asStateFlow()
+
+    fun scanAllSongs(function: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+
+            _scanCount.value = 0
+            val songs = SongScanner.scanAllSongs(
+                getApplication()
+            ) {
+                count ->
+                    _scanCount.value = count
             }
-            _songs.value = result
-            onScanned(result)
+
+            _songs.value = songs
+
+            _isScanning.value = false
         }
+    }
+
+    fun stopScanning() {
+        _isScanning.value = false
     }
 }
