@@ -50,6 +50,8 @@ dependencies {
     // Compose BOM (keeps compose libs aligned)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose.v193)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.text)
 
     // Jetpack Compose UI (BOM will provide specific versions)
     implementation(libs.ui)
@@ -79,6 +81,9 @@ dependencies {
     implementation(libs.androidx.room.runtime.v272)
     implementation(libs.androidx.room.ktx.v272)
     ksp(libs.androidx.room.compiler.v272)
+
+    // DataStore
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
 
     // Hilt (DI)
     implementation(libs.hilt.android)

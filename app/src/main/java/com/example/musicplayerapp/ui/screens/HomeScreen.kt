@@ -27,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import com.example.musicplayerapp.ui.components.SearchBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.example.musicplayerapp.ui.components.ScanningDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,8 +34,6 @@ fun HomeScreen(
     songs: List<Song>,
     currentSong: Song?,
     isPlaying: Boolean,
-    isScanning: Boolean,
-    scanCount: Int,
     onSongClick: (Song) -> Unit,
     onPlayPause: () -> Unit,
     onMiniPlayerClick: () -> Unit
@@ -103,9 +100,6 @@ fun HomeScreen(
         }
     ) { innerPadding ->
 
-        if (isScanning) {
-            ScanningDialog(count = scanCount)
-        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -120,7 +114,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                if (!isScanning && filteredSongs.isEmpty()) {
+                if (filteredSongs.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center

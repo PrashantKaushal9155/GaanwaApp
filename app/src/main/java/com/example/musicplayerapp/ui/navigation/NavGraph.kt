@@ -14,8 +14,6 @@ fun AppNavGraph(
     navController: NavHostController,
     songs: List<Song>,
     isPlaying: Boolean,
-    isScanning: Boolean,
-    scanCount: Int,
     currentPosition: Long,
     duration: Long,
     onSeek: (Long) -> Unit,
@@ -36,8 +34,6 @@ fun AppNavGraph(
                 songs = songs,
                 currentSong = currentSong,
                 isPlaying = isPlaying,
-                isScanning = isScanning,
-                scanCount = scanCount,
                 onSongClick = { song ->
                     onSongClick(song)
                     navController.navigate("player")

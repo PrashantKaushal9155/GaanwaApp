@@ -7,12 +7,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.rememberNavController
 import com.example.musicplayerapp.core.PermissionHandler
 import com.example.musicplayerapp.domain.player.MusicPlaybackService
 import com.example.musicplayerapp.ui.navigation.AppNavGraph
+import com.example.musicplayerapp.ui.screens.ScanningScreen
 import com.example.musicplayerapp.ui.theme.MusicPlayerAppTheme
 import com.example.musicplayerapp.ui.viewmodel.MainViewModel
 import com.example.musicplayerapp.ui.viewmodel.PlayerViewModel
@@ -45,40 +47,47 @@ class MainActivity : ComponentActivity() {
             val isShuffleEnabled by playerViewModel.isShuffleEnabled.collectAsState()
             val isScanning by viewModel.isScanning.collectAsState()
             val scanCount by viewModel.scanCount.collectAsState()
+            val navController = rememberNavController()
+            val songs by viewModel.songs.collectAsState()
+            val currentSong by playerViewModel.currentSong.collectAsState()
+            val isPlaying by playerViewModel.isPlaying.collectAsState()
+            val isRepeatEnabled by playerViewModel.isRepeatEnabled.collectAsState()
+
+            LaunchedEffect(songs) {
+                playerViewModel.onSongsLoaded(songs)
+            }
 
             MusicPlayerAppTheme {
                 Surface {
-                    val navController = rememberNavController()
 
-                    val songs by viewModel.songs.collectAsState()
-                    val currentSong by playerViewModel.currentSong.collectAsState()
-                    val isPlaying by playerViewModel.isPlaying.collectAsState()
-                    val isRepeatEnabled by playerViewModel.isRepeatEnabled.collectAsState()
-
-                    AppNavGraph(
-                        navController = navController,
-                        songs = songs,
-                        currentSong = currentSong,
-                        isPlaying = isPlaying,
-                        isScanning = isScanning,
-                        scanCount = scanCount,
-                        currentPosition = currentPosition,
-                        duration = duration,
-                        onSeek = { playerViewModel.seekTo(it) },
-                        onSongClick = { song ->
-                            playerViewModel.play(song, songs)
-                        },
-                        onPlayPause = {
-                            if (isPlaying) playerViewModel.pause() else playerViewModel.resume()
-                        },
-                        onPrevious = { playerViewModel.playPrevious()},
-                        isShuffleEnabled = isShuffleEnabled,
-                        onShuffleClick = { playerViewModel.toggleShuffle() },
-                        isRepeatEnabled = isRepeatEnabled,
-                        onRepeatClick = { playerViewModel.toggleRepeat() },
-                        onNext = { playerViewModel.playNext()},
-                        onBack = { /* Nothing extra yet. */}
-                    )
+                    if (isScanning) {
+                        ScanningScreen(
+                            count = scanCount
+                        )
+                    } else {
+                        AppNavGraph(
+                            navController = navController,
+                            songs = songs,
+                            currentSong = currentSong,
+                            isPlaying = isPlaying,
+                            currentPosition = currentPosition,
+                            duration = duration,
+                            onSeek = { playerViewModel.seekTo(it) },
+                            onSongClick = { song ->
+                                playerViewModel.play(song, songs)
+                            },
+                            onPlayPause = {
+                                if (isPlaying) playerViewModel.pause() else playerViewModel.resume()
+                            },
+                            onPrevious = { playerViewModel.playPrevious() },
+                            isShuffleEnabled = isShuffleEnabled,
+                            onShuffleClick = { playerViewModel.toggleShuffle() },
+                            isRepeatEnabled = isRepeatEnabled,
+                            onRepeatClick = { playerViewModel.toggleRepeat() },
+                            onNext = { playerViewModel.playNext() },
+                            onBack = { /* Nothing extra yet. */ }
+                        )
+                    }
                 }
             }
         }
