@@ -2,6 +2,7 @@ package com.example.musicplayerapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.rememberNavController
 import com.example.musicplayerapp.core.PermissionHandler
 import com.example.musicplayerapp.domain.player.MusicPlaybackService
+import com.example.musicplayerapp.domain.voice.VoiceCommandParser
 import com.example.musicplayerapp.ui.navigation.AppNavGraph
 import com.example.musicplayerapp.ui.screens.ScanningScreen
 import com.example.musicplayerapp.ui.theme.MusicPlayerAppTheme
@@ -34,6 +36,48 @@ class MainActivity : ComponentActivity() {
                 viewModel.stopScanning()
             }
         }
+
+    private val voiceLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+
+            if (result.resultCode == RESULT_OK) {
+
+                val spokenText =
+                    result.data
+                        ?.getStringArrayListExtra(
+                            RecognizerIntent.EXTRA_RESULTS
+                        )
+                        ?.firstOrNull()
+
+                if (!spokenText.isNullOrBlank()) {
+
+                    val command =
+                        VoiceCommandParser.parse(spokenText)
+
+                    playerViewModel.executeCommand(command)
+                }
+            }
+        }
+
+    private fun startVoiceRecognition() {
+
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+
+            putExtra(
+                RecognizerIntent.EXTRA_PROMPT,
+                "Speak a command"
+            )
+        }
+
+        voiceLauncher.launch(intent)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +129,8 @@ class MainActivity : ComponentActivity() {
                             isRepeatEnabled = isRepeatEnabled,
                             onRepeatClick = { playerViewModel.toggleRepeat() },
                             onNext = { playerViewModel.playNext() },
-                            onBack = { /* Nothing extra yet. */ }
+                            onBack = { /* Nothing extra yet. */ },
+                            onVoiceSearch = { startVoiceRecognition() }
                         )
                     }
                 }

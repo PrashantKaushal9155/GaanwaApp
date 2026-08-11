@@ -26,7 +26,8 @@ fun AppNavGraph(
     isRepeatEnabled: Boolean,
     onRepeatClick: () -> Unit,
     onNext: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onVoiceSearch: () -> Unit
 ) {
     NavHost(navController, startDestination = "home") {
         composable("home") {
@@ -41,7 +42,8 @@ fun AppNavGraph(
                 onPlayPause = onPlayPause,
                 onMiniPlayerClick = {
                     navController.navigate("player")
-                }
+                },
+                onVoiceSearch = onVoiceSearch
             )
         }
         composable("player") {

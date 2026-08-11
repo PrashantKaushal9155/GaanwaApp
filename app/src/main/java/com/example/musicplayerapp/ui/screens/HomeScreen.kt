@@ -20,6 +20,7 @@ import com.example.musicplayerapp.ui.components.MiniPlayer
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,7 +37,8 @@ fun HomeScreen(
     isPlaying: Boolean,
     onSongClick: (Song) -> Unit,
     onPlayPause: () -> Unit,
-    onMiniPlayerClick: () -> Unit
+    onMiniPlayerClick: () -> Unit,
+    onVoiceSearch: () -> Unit
 ) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -86,6 +88,15 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Search"
+                            )
+                        }
+
+                        IconButton(
+                            onClick = onVoiceSearch
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Mic,
+                                contentDescription = "Voice Command"
                             )
                         }
                     },

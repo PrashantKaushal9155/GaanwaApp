@@ -12,6 +12,7 @@ import androidx.media3.session.MediaController
 import com.example.musicplayerapp.data.preferences.PlayerPreferences
 import com.example.musicplayerapp.domain.player.MediaControllerManager
 import com.example.musicplayerapp.domain.player.toMediaItems
+import com.example.musicplayerapp.domain.voice.VoiceCommand
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -239,6 +240,65 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             }
 
             _currentSong.value = song
+        }
+    }
+
+    fun executeCommand(command: VoiceCommand) {
+
+        when (command) {
+
+            VoiceCommand.Play ->
+                resume()
+
+            VoiceCommand.Pause ->
+                pause()
+
+            VoiceCommand.Next ->
+                playNext()
+
+            VoiceCommand.Previous ->
+                playPrevious()
+
+            VoiceCommand.ShuffleOn -> {
+
+                if (!controller!!.shuffleModeEnabled)
+                    toggleShuffle()
+            }
+
+            VoiceCommand.ShuffleOff -> {
+
+                if (controller!!.shuffleModeEnabled)
+                    toggleShuffle()
+            }
+
+            VoiceCommand.RepeatOn -> {
+
+                if (controller!!.repeatMode == Player.REPEAT_MODE_ONE)
+                    toggleRepeat()
+            }
+
+            VoiceCommand.RepeatOff -> {
+
+                if (controller!!.repeatMode == Player.REPEAT_MODE_OFF)
+                    toggleRepeat()
+            }
+
+            is VoiceCommand.PlaySong -> {
+
+                val song =
+                    playlist.firstOrNull {
+
+                        it.title.contains(
+                            command.query,
+                            ignoreCase = true
+                        )
+                    }
+
+                if (song != null)
+                    play(song, playlist)
+            }
+
+            else -> {}
         }
     }
 
